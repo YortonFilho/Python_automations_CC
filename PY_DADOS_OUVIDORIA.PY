@@ -42,19 +42,14 @@ def add_mes_ref_column(df):
         if pd.isna(date_str):
             return None
         
-        # Converter a string de data para um objeto datetime
         date = pd.to_datetime(date_str, format='%d/%m/%Y')
-        
-        # Verificar o dia da data
         if date.day in [29, 30, 31]:
-            # Definir o primeiro dia do próximo mês caso seja dia 29 em diante
             if date.month == 12:
                 next_month = 1
                 next_year = date.year + 1
             else:
                 next_month = date.month + 1
                 next_year = date.year
-
             return f'01/{next_month:02d}/{next_year}'
         else:
             return f'01/{date.month:02d}/{date.year}'
@@ -75,7 +70,6 @@ def add_filtro_column(df):
 # Função para calcular a data de início com base no dia atual
 def calculate_start_date():
     today = datetime.now()
-    
     if today.day > 29:
         start_date = today.replace(day=29).strftime('%Y-%m-%d')
     else:
@@ -206,12 +200,29 @@ try:
                     continue
                 elif 'NUM' in col.upper():
                     df_filtered[col] = pd.to_numeric(df_filtered[col], errors='coerce')
-            
-            # Query para limpar a tabela
+
+            # Obter a data atual
             date = datetime.now()
-            month = f'{date.month:02d}'
+            month = date.month
             year = date.year
-            delete_command = f"DELETE FROM {table} WHERE MES_REF = '01/{month}/{year}'"
+
+            # Verifica se o dia atual é 29, 30 ou 31
+            if date.day >= 29:
+                if month == 12:
+                    next_month = 1
+                    next_year = year + 1
+                else:
+                    next_month = month + 1
+                    next_year = year
+            else:
+                next_month = month
+                next_year = year
+
+            # Formata o primeiro dia do próximo mês
+            next_month_start = f'01/{next_month:02d}/{next_year}'
+
+            # Comando para deletar dados do banco
+            delete_command = f"DELETE FROM {table} WHERE MES_REF = '{next_month_start}'"
             
             # Deletar dados do banco
             try:

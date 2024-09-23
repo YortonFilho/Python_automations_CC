@@ -22,7 +22,7 @@ Função: Primeiro, filtra dados de um espaço específico no ClickUp, se basean
 
 #### PY_DADOS_FARMACIA
 
-Função: Exporta dados de novos assinantes pelo banco de dados Oracle para um arquivo CSV, para descontos em farmácias (Não está 100% automatizada pois preciso fazer cruzamentos com outras tabelas usando filtros antes de enviar por email, passos esses que não consegui automatizar ainda, por enquanto a única coisa que essa automação faz é deixar o arquivo atualizado pra mim toda manhã, 5 minutos antes de eu chegar)
+Função: Exporta dados de todos assinantes de um plano da empresa pelo banco de dados Oracle, importa os dados para um arquivo excel que tem 2 abas, uma com todos assinantes, e a outra com todos assinantes já enviados para as farmácias. Então faz um cruzamento entre essas 2 abas para gerar um arquivo com os novos assinantes para enviar para as farmácias por email. Por fim, atualiza a 2º aba para no dia seguinte, fazer todo o processo de novo.
 
 #### IMPORT_DADOS_X5_PERFORMANCE_AGENTES:
 
