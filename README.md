@@ -14,7 +14,7 @@ Os scripts que começam com "IMPORT_", são scripts feitos para facilitarem a im
 
 #### PY_CAMPANHA_ANIVER:
 
-Função: Exporta dados de aniversariantes do banco de dados Oracle para um arquivo CSV, depois converte esse CSV para um array para importar e atualizar uma campanha via API. Determina o ID da campanha com base no dia da semana (são três campanhas para atualizar, cada uma em dias diferentes).
+Função: Exporta dados de aniversariantes do dia atual, do banco de dados Oracle para um arquivo CSV (para ter salvo nos arquivos da empresa), depois converte esse CSV para um array para importar e atualizar os dados em uma campanha via API. Temos 3 campanhas disponíveis em relação aos aniversáriantes, a campanha certa é definida pelo seu ID, sendo validada por qual dia da semana está sendo rodado o script.
 
 #### PY_DADOS_OUVIDORIA
 
@@ -22,7 +22,7 @@ Função: Primeiro, filtra dados de um espaço específico no ClickUp, se basean
 
 #### PY_DADOS_FARMACIA
 
-Função: Exporta dados de todos assinantes de um plano da empresa pelo banco de dados Oracle, importa os dados para um arquivo excel que tem 2 abas, uma com todos assinantes, e a outra com todos assinantes já enviados para as farmácias. Então faz um cruzamento entre essas 2 abas para gerar um arquivo com os novos assinantes para enviar para as farmácias por email. Por fim, atualiza a 2º aba para no dia seguinte, fazer todo o processo de novo.
+Função: Exporta dados de assinantes de um plano da empresa pelo banco de dados Oracle, depois importa esses dados em um arquivo excel, atualizando a 1º aba. Esse arquivo tem 2 abas, uma com todos assinantes, e a outra com todos assinantes já enviados para as farmácias. Então faz um cruzamento entre essas 2 abas para gerar um arquivo com os novos assinantes que não foram enviados ainda. No meio do código tem uma condição, que envia um dos 3 tipos de emails específicos para cada situação, sendo um deles, o email com os novos assinantes para atualizar as farmácias. Por fim, o script atualiza a 2º aba com a data atual para no dia seguinte, fazer todo o processo de novo.
 
 #### IMPORT_DADOS_X5_PERFORMANCE_AGENTES:
 
