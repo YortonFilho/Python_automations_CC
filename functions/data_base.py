@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 import pyodbc
-from functions.colors import red, green
+from colors import red, green
 import os
 
 # carregar variáveis de ambiente
