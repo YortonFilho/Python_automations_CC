@@ -78,7 +78,7 @@ month = f'{date.month:02d}'
 year = date.year
 
 # Caminho dos arquivos
-excel_file = os.path.join('sys.path.append("C:\\data-integration\\Automatizacao\\Python\\Yorton\\Python_automations_CC\\SETOR_DADOS\\PY_DADOS_FARMACIA\\05 - farmacia.xlsx')
+excel_file = os.path.join('C:\\data-integration\\Automatizacao\\Python\\Yorton\\Python_automations_CC\\SETOR_DADOS\\PY_DADOS_FARMACIA\\05 - farmacia.xlsx')
 output_file = os.path.join(f'C:\\data-integration\\Automatizacao\\Python\\Yorton\\Python_automations_CC\\SETOR_DADOS\\PY_DADOS_FARMACIA\\19013906000179 - DR_CENTRAL_FARMACIAS {day}{month}{year}.xlsx')
 
 def clean_cpf(cpf):

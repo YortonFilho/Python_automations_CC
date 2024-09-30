@@ -6,7 +6,7 @@ import pyodbc
 import os
 import sys
 
-sys.path.append("C:\\Users\\yorton.filho\\Desktop\\Python_automations_CC\\functions")
+sys.path.append("C:\\data-integration\\Automatizacao\\Python\\Yorton\\Python_automations_CC\\functions")
 from data_base import db_connection  # função para conectar com banco de dados
 from colors import green, red  # função para utilizar cores nos prints para melhor visualização
 
@@ -39,26 +39,17 @@ def rename_columns(df, column_mapping):
     df = df.rename(columns=column_mapping)
     return df
 
-# Função para adicionar a coluna MES_REF
-def add_mes_ref_column(df):
-    def get_mes_ref(date_str):
-        if pd.isna(date_str):
-            return None
-        
-        date = pd.to_datetime(date_str, format='%d/%m/%Y')
-        if date.day in [29, 30, 31]:
-            if date.month == 12:
-                next_month = 1
-                next_year = date.year + 1
-            else:
-                next_month = date.month + 1
-                next_year = date.year
-            return f'01/{next_month:02d}/{next_year}'
+# Função para adicionar a coluna MES_REF com base no dia atual
+def add_mes_ref_column():
+    today = datetime.now()
+    if today.day in [30, 31]:
+        if today.month == 12:
+            return f'01/01/{today.year + 1}'  # Janeiro do próximo ano
         else:
-            return f'01/{date.month:02d}/{date.year}'
-    
-    df['MES_REF'] = df['DATA_CRIACAO'].apply(get_mes_ref)
-    return df
+            next_month = today.month + 1
+            return f'01/{next_month:02d}/{today.year}'
+    else:
+        return f'01/{today.month:02d}/{today.year}'  # Retorna o mês atual
 
 # Função para ajustar a coluna SLA e renomear para SLA_AJUSTADO
 def adjust_sla_column(df):
@@ -152,7 +143,7 @@ column_mapping = {
 df_filtered = rename_columns(df_filtered, column_mapping)
 
 # Adiciona a coluna MES_REF
-df_filtered = add_mes_ref_column(df_filtered)
+df_filtered['MES_REF'] = add_mes_ref_column()
 
 # Ajusta a coluna SLA para incluir apenas números e renomeia para SLA_AJUSTADO
 df_filtered = adjust_sla_column(df_filtered)
@@ -204,28 +195,8 @@ try:
                 elif 'NUM' in col.upper():
                     df_filtered[col] = pd.to_numeric(df_filtered[col], errors='coerce')
 
-            # Obter a data atual
-            date = datetime.now()
-            month = date.month
-            year = date.year
-
-            # Verifica se o dia atual é 29, 30 ou 31
-            if date.day >= 29:
-                if month == 12:
-                    next_month = 1
-                    next_year = year + 1
-                else:
-                    next_month = month + 1
-                    next_year = year
-            else:
-                next_month = month
-                next_year = year
-
-            # Formata o primeiro dia do próximo mês
-            next_month_start = f'01/{next_month:02d}/{next_year}'
-
             # Comando para deletar dados do banco
-            delete_command = f"DELETE FROM {table} WHERE MES_REF = '{next_month_start}'"
+            delete_command = f"DELETE FROM {table} WHERE MES_REF = '{df_filtered['MES_REF'][0]}'"  # Usando o primeiro valor de MES_REF
             
             # Deletar dados do banco
             try:
