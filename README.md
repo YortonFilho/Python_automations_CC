@@ -19,13 +19,13 @@ Os scripts que começam com "PY_" servem apenas para organização no Jenkins e 
 
 ## Informações sobre cada automação
 
-#### PY_PONTO_SABADO (RH)
+#### PY_RH_PONTO_SABADO (RH)
 
 Função: Analisa quatro planilhas de ponto, agrupando os nomes para gerar uma nova planilha com todos os colaboradores que trabalharam nos sábados, trazendo quantos e quais sábados trabalharam. Também analisa uma quinta planilha, aonde encontra os cargos de cada colaborador, para acrescentar ao relatório.
 
 Observação: Criei um executável a partir do meu código, para o RH conseguir rodar o script no computador deles, sem a necessidade de instalar nenhuma dependência.
 
-#### PY_CAMPANHA_ANIVER (DADOS)
+#### PY_DADOS_CAMPANHA_ANIVER (DADOS)
 
 Função: Exporta dados dos aniversariantes do dia atual, do banco de dados Oracle para um arquivo CSV (para ter salvo nos arquivos da empresa), depois converte esse CSV para um array para importar e atualizar os dados de uma campanha via API. Temos 3 campanhas disponíveis em relação aos aniversáriantes, a campanha certa é definida pelo seu ID, sendo validada por qual dia da semana está sendo rodado o script.
 

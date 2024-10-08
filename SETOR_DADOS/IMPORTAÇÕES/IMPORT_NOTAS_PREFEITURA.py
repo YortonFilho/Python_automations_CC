@@ -1,6 +1,7 @@
 import pyodbc
 import pandas as pd
 import sys
+from datetime import datetime
 
 # Importando as funções globais para reaproveitamento de código
 sys.path.append("C:\\data-integration\\Automatizacao\\Python\\Yorton\\Python_automations_CC\\functions")
@@ -8,7 +9,7 @@ from data_base import db_connection  # função para conectar com banco de dados
 from colors import green, red  # função para utilizar cores nos prints para melhor visualização
 
 # Caminho para o arquivo Excel
-excel_file = 'C:\\temp\\IMPORTS\\IMPORT DRC_NOTAS_PREFEITURA.xlsx'
+excel_file = 'C:\\temp\\IMPORTS\\IMPORT DRC NOTAS PREFEITURA.xlsx'
 
 # Lendo arquivo excel
 try:
@@ -40,12 +41,31 @@ try:
             # Reordenar as colunas para garantir que estão na mesma ordem que a tabela
             data = data[columns]
 
+            # Váriaveis da data para ajustar a query com o mes e ano atual
+            date = datetime.now()
+            month = f'{date.month:02d}'
+            year = date.year
+
+            # Criando query de exclusao de dados
+            delete_command = f"""
+            DELETE {table}
+            WHERE TO_CHAR(DATA_EMISSAO, 'MM/RRRR') = '{month}/{year}'
+            """
+
+            # Excluindo dados do banco
+            try:
+                cursor.execute(delete_command)
+                print(green("Dados deletados com sucesso!"))
+            except pyodbc.Error as e:
+                print(red("Erro ao deletar dados!"))
+                exit()
+
             # Inserir dados na tabela Oracle
             for index, row in data.iterrows():
                 values = row.tolist()  # Converte a linha em lista de valores
 
                 # Criar a query de inserção com TO_DATE para datas
-                command = f"""
+                insert_command = f"""
                 INSERT INTO {table} (
                     {', '.join(columns)}
                 ) VALUES (
@@ -62,7 +82,7 @@ try:
 
                 # Inserindo os dados no banco
                 try:
-                    cursor.execute(command, values[3:])  # Passar apenas os valores restantes
+                    cursor.execute(insert_command, values[3:])  # Passar apenas os valores restantes
                 except pyodbc.Error as e:
                     print(red(f"Erro ao inserir dados: {e}"))
                     exit()
