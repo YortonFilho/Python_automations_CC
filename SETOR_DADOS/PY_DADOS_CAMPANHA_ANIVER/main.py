@@ -5,6 +5,7 @@ from datetime import datetime
 import requests
 import json # fiz um print na linha 122 para debugging, deixei comentado por não precisar mais por enquanto
 import sys
+import holidays
 
 # importando as funções globais para reaproveitamento de código
 sys.path.append("C:\\data-integration\\Automatizacao\\Python\\Yorton\\Python_automations_CC\\functions")
@@ -70,16 +71,22 @@ except pyodbc.Error as e:
 date = datetime.now()
 week_day = date.weekday()  # 0=segunda ... 6=domingo
 
-# Se for dia de semana, vai ser uma campanha específica...
-# se for sábado vai ser outra campanha e se for domingo será outra... 
-if week_day < 5:
-    campaign_id = 123
-elif week_day == 5:
-    campaign_id = 124
-elif week_day == 6:
-    campaign_id = 125
+# Verificando se o dia atual é feriado
+brazil_holidays = holidays.Brazil()
+rs_rolidays = holidays.Brazil(state='RS')
+
+if date in brazil_holidays or date in rs_rolidays:
+    campaign_id = 104
 else:
-    print(red("Erro ao definir ID da campanha!"))
+    # Se não for feriado, determinar a campanha com base no dia da semana
+    if week_day < 5:
+        campaign_id = 123
+    elif week_day == 5:
+        campaign_id = 124
+    elif week_day == 6:
+        campaign_id = 125
+    else:
+        print(red("Erro ao definir ID da campanha!"))
 
 #-------------------------------------------------------------------DELETANDO E IMPORTANDO DADOS PELA API
 # Variáveis com as informações necessárias para acessar os endpoints
