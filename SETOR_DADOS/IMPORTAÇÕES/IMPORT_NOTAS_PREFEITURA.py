@@ -66,7 +66,7 @@ column_mapping = {
 try:
     with db_connection() as connection:  # conectando com banco de dados
         with connection.cursor() as cursor:  # abrindo central para rodar a query
-            table = 'DRC_NOTAS_PREFEITURA_TESTE'
+            table = 'DRC_NOTAS_PREFEITURA'
             
             # Obter a estrutura da tabela Oracle
             cursor.execute(f"SELECT COLUMN_NAME FROM ALL_TAB_COLUMNS WHERE TABLE_NAME = '{table}'")

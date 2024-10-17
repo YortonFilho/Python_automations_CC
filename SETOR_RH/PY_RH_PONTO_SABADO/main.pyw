@@ -85,8 +85,10 @@ for i, planilha in enumerate(planilhas):
                                 continue
             else:
                 mostrar_erro(f"A planilha {planilha} não contém a coluna esperada.")
+                exit()
     except Exception as e:
         mostrar_erro(f"erro ao processar {planilha}: {e}")
+        exit()
 
 # filtrar apenas colaboradores que tem pelo menos uma presença
 presenca_filtrada = {k: v for k, v in presenca.items() if any(presenca[k])}

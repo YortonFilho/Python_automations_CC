@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 import re
 from datetime import datetime, timedelta
-import pyodbc
+import holidays
 import os
 import sys
 
@@ -51,16 +51,6 @@ def add_mes_ref_column():
     else:
         return f'01/{today.month:02d}/{today.year}'  # Retorna o mês atual
 
-# Função para ajustar a coluna SLA e renomear para SLA_AJUSTADO
-def adjust_sla_column(df):
-    df['SLA_AJUSTADO'] = df['SLA'].apply(lambda x: ''.join(re.findall(r'\d+', str(x))))
-    return df
-
-# Função para adicionar a coluna FILTRO com base na coluna SLA_AJUSTADO
-def add_filtro_column(df):
-    df['FILTRO'] = df['SLA_AJUSTADO'].apply(lambda x: 'OK' if int(x) < 3 else 'FORA')
-    return df
-
 # Função para calcular a data de início com base no dia atual
 def calculate_start_date():
     today = datetime.now()
@@ -73,6 +63,33 @@ def calculate_start_date():
             start_date = today.replace(month=today.month - 1, day=29).strftime('%Y-%m-%d')
     
     return start_date
+
+# Função para ajustar a coluna SLA e renomear para SLA_AJUSTADO
+def adjust_sla_column(df):
+    df['SLA_AJUSTADO'] = df['SLA'].apply(lambda x: ''.join(re.findall(r'\d+', str(x))))
+    return df
+
+# Função para adicionar a coluna FILTRO com base na coluna SLA_AJUSTADO
+def add_filtro_column(df):
+    df['DIA_UTEIS'] = df.apply(lambda row: contar_dias_uteis(row['DATA_CRIACAO'], row['DATA_FECHAMENTO']), axis=1)
+    df['FILTRO'] = df['DIA_UTEIS'].apply(lambda x: 'OK' if x <= 2 else 'FORA')
+    return df
+
+# Função para contar dias úteis
+def contar_dias_uteis(data_criacao, data_fechamento):
+    brasil = holidays.Brazil()  # Feriados nacionais
+    data_criacao = pd.to_datetime(data_criacao, format='%d/%m/%Y')
+    data_fechamento = pd.to_datetime(data_fechamento, format='%d/%m/%Y')
+    
+    dias_uteis = 0
+    data_atual = data_criacao
+
+    while data_atual <= data_fechamento:
+        if data_atual.weekday() < 5 and data_atual not in brasil:  # Verifica se não é sábado(5) ou domingo(6) e não é feriado
+            dias_uteis += 1
+        data_atual += timedelta(days=1)
+
+    return dias_uteis
 
 # Variáveis da API
 token = os.getenv('CHAVE_API_CLICKUP')
@@ -148,7 +165,7 @@ df_filtered['MES_REF'] = add_mes_ref_column()
 # Ajusta a coluna SLA para incluir apenas números e renomeia para SLA_AJUSTADO
 df_filtered = adjust_sla_column(df_filtered)
 
-# Adiciona a coluna FILTRO com base na coluna SLA_AJUSTADO
+# Adiciona a coluna FILTRO com base na coluna DIA_UTEIS
 df_filtered = add_filtro_column(df_filtered)
 
 # Reordena as colunas conforme a ordem desejada, incluindo a nova coluna
