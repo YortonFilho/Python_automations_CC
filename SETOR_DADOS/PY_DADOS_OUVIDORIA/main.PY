@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import holidays
 import os
 import sys
+import pyodbc
 
 sys.path.append("C:\\data-integration\\Automatizacao\\Python\\Yorton\\Python_automations_CC\\functions")
 from data_base import db_connection  # função para conectar com banco de dados
@@ -85,7 +86,7 @@ def contar_dias_uteis(data_criacao, data_fechamento):
     data_atual = data_criacao
 
     while data_atual <= data_fechamento:
-        if data_atual.weekday() < 5 and data_atual not in brasil:  # Verifica se não é sábado(5) ou domingo(6) e não é feriado
+        if data_atual.weekday() < 6 and data_atual not in brasil:  # Verifica se não é domingo(6) e não é feriado
             dias_uteis += 1
         data_atual += timedelta(days=1)
 
