@@ -19,33 +19,37 @@ Os scripts que começam com "PY_" servem apenas para organização no Jenkins e 
 
 ## Informações sobre cada automação
 
-#### PY_RH_PONTO_SABADO (RH)
+#### PY_RH_PONTO_SABADO
 
 Função: Analisa quatro planilhas de ponto, agrupando os nomes para gerar uma nova planilha com todos os colaboradores que trabalharam nos sábados, trazendo quantos e quais sábados trabalharam. Também analisa uma quinta planilha, aonde encontra os cargos de cada colaborador, para acrescentar ao relatório.
 
 Observação: Criei um executável a partir do meu código, para o RH conseguir rodar o script no computador deles, sem a necessidade de instalar nenhuma dependência.
 
-#### PY_DADOS_CAMPANHA_ANIVER (DADOS)
+#### PY_DADOS_CAMPANHA_ANIVER
 
 Função: Exporta dados dos aniversariantes do dia atual, do banco de dados Oracle para um arquivo CSV (para ter salvo nos arquivos da empresa), depois converte esse CSV para um array para importar e atualizar os dados de uma campanha via API. Temos 4 campanhas disponíveis em relação aos aniversáriantes, a campanha certa é definida pelo seu ID, sendo validada por qual dia da semana está sendo rodado o script e se o dia que está sendo rodado é feriado.
 
-#### PY_DADOS_OUVIDORIA (DADOS)
+#### PY_DADOS_PAGARME_API_V1_LINKS
+
+Função: Coletar todos os dados de links pagos do PAGARME, filtrar campos específicos, formatar dados necessários e importar para o banco de dados Oracle, subscrevendo os dados já existentes no banco (Deleta tudo do banco e insere tudo de novo atualizando casos do passado).
+
+#### PY_DADOS_OUVIDORIA
 
 Função: Primeiro, filtra dados de um espaço específico no ClickUp, se baseando no dia 29 do mes passado até um dia anterior do dia atual, e os extrai usando a API. Em seguida, trata esses dados, realizando as conversões necessárias, e os salva em um arquivo Excel. Após isso, o script remove os dados referentes ao mês atual no banco de dados Oracle e importa os dados extraídos para atualizar o banco. 
 
-#### PY_DADOS_FARMACIA (DADOS)
+#### PY_DADOS_FARMACIA
 
 Função: Exporta dados de assinantes de um plano da empresa pelo banco de dados Oracle, depois importa esses dados em um arquivo excel, atualizando a 1º aba. Esse arquivo tem 2 abas, uma com todos assinantes, e a outra com todos assinantes já enviados para as farmácias. Então faz um cruzamento entre essas 2 abas para gerar um arquivo com os novos assinantes que não foram enviados ainda. No meio do código tem uma condição, que envia um dos 3 tipos de emails específicos para cada situação, sendo um deles, o email com os novos assinantes para atualizar as farmácias. Por fim, o script atualiza a 2º aba com os assinantes enviados e a data atual, para no dia seguinte fazer todo o processo de novo.
 
-#### IMPORT_NOTAS_PREFEITURA (DADOS)
+#### IMPORT_NOTAS_PREFEITURA
 
 Função: importar dados das notas de faturamento das vendas.
 
-#### IMPORT_X5_PERFORMANCE_AGENTES (DADOS)
+#### IMPORT_X5_PERFORMANCE_AGENTES
 
 Função: Importa dados de um arquivo Excel para uma tabela do banco de dados Oracle. 
 
-#### IMPORT_RESULTADO_OPERADORES (DADOS)
+#### IMPORT_RESULTADO_OPERADORES
 
 Função: Importa dados de um arquivo Excel para uma tabela do banco de dados Oracle, com conversão de valores numéricos. 
 
