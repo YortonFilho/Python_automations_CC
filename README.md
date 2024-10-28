@@ -11,6 +11,8 @@ A pasta "SETOR_RH", são todas as automações feitas para o RH.
 
 A pasta "IMPORTAÇÕES" são scripts para facilitarem a importação de dados no banco Oracle (são dados que precisam ser importados diariamente).
 
+A pasta "PAGARME" são automações utilizando a API da pagar.me.
+
 A pasta "ANTIGO", são scripts que não são mais utilizados, mas achei importante ter guardado caso precise futuramente.
 
 Precisei seguir um padrão nos nomes das automações com base nas outras que já tinham na empresa antes de eu entrar. Por isso os nomes estão em português, e o resto está em inglês (prefiro utilizar inglês)
@@ -18,6 +20,10 @@ Precisei seguir um padrão nos nomes das automações com base nas outras que j�
 Os scripts que começam com "PY_" servem apenas para organização no Jenkins e nos fluxogramas do Miro, pois temos automações do Pentaho ativas. Os scripts que começam com "IMPORT_", são scripts de importação para o Oracle SQL.
 
 ## Informações sobre cada automação
+
+#### PY_DADOS_PAGARME_V1_LINKS | ...V1_ORDERS | ...V1_TRANSACTIONS
+
+Função: Coleta dados de links, ordens e transações da Pagar.me via API, filtrar campos específicos, formatar dados necessários e importar para o banco de dados Oracle, subscrevendo os dados já existentes no banco (Deleta tudo do banco e insere tudo de novo atualizando casos do antigos).
 
 #### PY_RH_PONTO_SABADO
 
@@ -27,11 +33,7 @@ Observação: Criei um executável a partir do meu código, para o RH conseguir 
 
 #### PY_DADOS_CAMPANHA_ANIVER
 
-Função: Exporta dados dos aniversariantes do dia atual, do banco de dados Oracle para um arquivo CSV (para ter salvo nos arquivos da empresa), depois converte esse CSV para um array para importar e atualizar os dados de uma campanha via API. Temos 4 campanhas disponíveis em relação aos aniversáriantes, a campanha certa é definida pelo seu ID, sendo validada por qual dia da semana está sendo rodado o script e se o dia que está sendo rodado é feriado.
-
-#### PY_DADOS_PAGARME_API_V1_LINKS
-
-Função: Coletar todos os dados de links pagos do PAGARME, filtrar campos específicos, formatar dados necessários e importar para o banco de dados Oracle, subscrevendo os dados já existentes no banco (Deleta tudo do banco e insere tudo de novo atualizando casos do passado).
+Função: Exporta dados dos aniversariantes do dia atual, do banco de dados Oracle para um arquivo CSV (para ter salvo nos arquivos da empresa), depois converte esse CSV para um JSON, para importar e atualizar os dados de uma campanha via API. Temos 4 campanhas disponíveis em relação aos aniversáriantes, a campanha certa é definida pelo seu ID, sendo validada por qual dia da semana está sendo rodado o script e se o dia atual é feriado.
 
 #### PY_DADOS_OUVIDORIA
 
@@ -67,6 +69,9 @@ Para rodar os scripts, você vai precisar adicionar as seguintes variáveis de a
 
 'CHAVE_API_X5'
 'CHAVE_API_CLICKUP'
+
+'CHAVE_API_PAGARME'
+'SENHA_API_PAGARME'
 
 'EMAIL_ZIMBRA'
 'SENHA_EMAIL_ZIMBRA'

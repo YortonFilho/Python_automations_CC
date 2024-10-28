@@ -21,7 +21,6 @@ def data_colect():
     credentials = f'{username}:{password}'
     b64_credentials = base64.b64encode(credentials.encode()).decode()
 
-    # Cria o cabeçalho
     headers = {
         'Authorization': f'Basic {b64_credentials}'
     }
@@ -37,12 +36,13 @@ def data_colect():
         response = requests.get(url, headers=headers, params=params)
 
         if response.status_code == 200:
-            data = response.json()  # Converte a resposta para JSON
-            all_data.extend(data)  # Adiciona os dados à lista
+            data = response.json()
+            all_data.extend(data) 
             print(green(f"Dados extraídos da página {count} com sucesso!"))
 
             count =+ 1
             page_id = response.headers.get('x-cursor-nextpage')  # verifica o id da próxima página
+            
             if not page_id:  # Se não houver mais páginas, sai do loop
                 break
         else:
@@ -99,12 +99,12 @@ def data_updating(final_df):
                 delete_command = f"""DELETE {table}"""
                 
                 # Listar colunas da tabela para depuração
-                cursor.execute(f"SELECT COLUMN_NAME FROM ALL_TAB_COLUMNS WHERE TABLE_NAME = '{table}'")
-                columns = [row[0] for row in cursor.fetchall()]
-                print(green(f"Colunas na tabela {table}: {columns}"))
+                # cursor.execute(f"SELECT COLUMN_NAME FROM ALL_TAB_COLUMNS WHERE TABLE_NAME = '{table}'")
+                # columns = [row[0] for row in cursor.fetchall()]
+                # print(green(f"Colunas na tabela {table}: {columns}"))
 
                 # Verifique os nomes das colunas no DataFrame
-                print("Colunas no DataFrame:", final_df.columns.tolist())
+                # print("Colunas no DataFrame:", final_df.columns.tolist())
 
                 try:
                         cursor.execute(delete_command)
@@ -122,7 +122,7 @@ def data_updating(final_df):
                     values.insert(3, formatted_date)  # Insere a data convertida na posição correta
 
                     # Debug: Mostre os valores
-                    print("Valores a serem inseridos:", values)
+                    # print("Valores a serem inseridos:", values)
 
                     try:
                         cursor.execute(insert_command, values)

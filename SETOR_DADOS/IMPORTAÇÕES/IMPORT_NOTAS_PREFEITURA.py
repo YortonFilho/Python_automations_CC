@@ -20,11 +20,12 @@ def selecionar_arquivos():
 # Selecionar arquivo Excel
 caminhos_arquivos = selecionar_arquivos()
 
-# Usar apenas o primeiro arquivo selecionado
+# Se nenhum arquivo for selecionado, encerra o programa
 if not caminhos_arquivos:
     print(red("Nenhum arquivo selecionado."))
     exit()
 
+# Usar apenas o primeiro arquivo selecionado
 excel_file = caminhos_arquivos[0]
 
 # Lendo arquivo excel a partir da 8ª linha e ignorando as 2 últimas linhas
@@ -43,7 +44,7 @@ for column in date_columns:
     if column in data.columns:
         data[column] = pd.to_datetime(data[column], format='%d/%m/%Y', errors='coerce')
 
-# Mapeamento de colunas
+# Renomeia colunas
 column_mapping = {
     'Número NFSE': 'NUMERO_NFSE',
     'Data Em. Nota': 'DATA_EMISSAO',
