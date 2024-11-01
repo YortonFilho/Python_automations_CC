@@ -20,7 +20,7 @@ username = os.getenv('EMAIL_ZIMBRA')
 password = os.getenv('SENHA_EMAIL_ZIMBRA')
 
 # Função para enviar e-mail com anexo
-def enviar_email(to_email, subject, body, attachment_path, bcc_emails):
+def send_email(to_email, subject, body, attachment_path, bcc_emails):
     msg = MIMEMultipart()
     msg['From'] = username
     msg['To'] = to_email
@@ -142,7 +142,7 @@ try:
                 attachment_path = None
                 bcc_emails = ["dados@centraldeconsultas.med.br"]
                 # Enviando o e-mail
-                enviar_email(to_email, subject, body, attachment_path, bcc_emails)
+                send_email(to_email, subject, body, attachment_path, bcc_emails)
                 exit()
             elif num_rows_db == num_rows_sheet:
                 print(red("Erro: O número de linhas no banco de dados é igual ao número de linhas na primeira aba da planilha!"))
@@ -162,7 +162,7 @@ try:
                               "convenios@farmaciassaojoao.com.br",
                               "dados@centraldeconsultas.med.br"]
                 # Enviando o e-mail
-                enviar_email(to_email, subject, body, attachment_path, bcc_emails)
+                send_email(to_email, subject, body, attachment_path, bcc_emails)
                 exit()
             elif num_rows_db > num_rows_sheet:
                 # Limpar a primeira aba preservando o cabeçalho
@@ -200,9 +200,9 @@ try:
                 next_empty_row += 1
 
             # Adicionar os dados ao Excel apenas nas duas primeiras colunas
-            for nome, cpf in rows:
+            for name, cpf in rows:
                 # Insere dados nas colunas 1 e 2
-                sheet1.cell(row=next_empty_row, column=1, value=nome)
+                sheet1.cell(row=next_empty_row, column=1, value=name)
                 sheet1.cell(row=next_empty_row, column=2, value=cpf)
                 next_empty_row += 1  # Passa para a próxima linha vazia
 
@@ -227,22 +227,22 @@ try:
             # print("CPFs da segunda aba:", cpfs_sheet2) 
 
             # Identificando CPFs que não estão na segunda aba
-            cpfs_nao_encontrados = [(sheet1.cell(row=row, column=1).value, sheet1.cell(row=row, column=2).value)
+            cpf_not_found = [(sheet1.cell(row=row, column=1).value, sheet1.cell(row=row, column=2).value)
                 for row in range(2, sheet1.max_row + 1) 
                 if clean_cpf(sheet1.cell(row=row, column=2).value) not in cpfs_sheet2]
 
             # Verificando se todos os CPFs foram encontrados
-            if not cpfs_nao_encontrados:
+            if not cpf_not_found:
                 print(red("Erro: Todos os CPFs da primeira aba já foram enviados para a segunda aba!"))
             else:
                 # Criando uma nova planilha para CPFs não encontrados
-                df_nao_encontrados = pd.DataFrame(cpfs_nao_encontrados, columns=["Nome", "CPF"])
-                df_nao_encontrados.to_excel(output_file, index=False)
+                df_cpf_not_found = pd.DataFrame(cpf_not_found, columns=["Nome", "CPF"])
+                df_cpf_not_found.to_excel(output_file, index=False)
                 print(green(f"Planilha com CPFs não encontrados criada: {output_file}"))
 
                 # Adicionando CPFs não encontrados na segunda aba com a data da modificação
                 next_empty_row_sheet2 = sheet2.max_row + 1  # Próxima linha vazia na segunda aba
-                for nome, cpf in cpfs_nao_encontrados:
+                for name, cpf in cpf_not_found:
                     sheet2.cell(row=next_empty_row_sheet2, column=1, value=cpf)  # CPF na coluna 1
                     sheet2.cell(row=next_empty_row_sheet2, column=2, value=date.strftime('%d/%m/%Y')) 
                     next_empty_row_sheet2 += 1
@@ -258,4 +258,4 @@ try:
 except pyodbc.Error as e:
     print(red(f"Erro ao conectar ou interagir com o banco de dados: {e}"))
 
-enviar_email(to_email, subject, body, attachment_path, bcc_emails)
+send_email(to_email, subject, body, attachment_path, bcc_emails)

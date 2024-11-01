@@ -10,23 +10,23 @@ sys.path.append("C:\\data-integration\\Automatizacao\\Python\\Yorton\\Python_aut
 from data_base import db_connection  # função para conectar com banco de dados
 from colors import green, red  # função para utilizar cores nos prints para melhor visualização
 
-# função para selecionar os arquivos a serem analisados
-def selecionar_arquivos():
+# função para selecionar os arquivos
+def select_file():
     root = tk.Tk()
     root.withdraw()
-    caminhos_arquivos = filedialog.askopenfilenames(filetypes=[("Excel files", "*.xlsx")])
-    return caminhos_arquivos
+    file = filedialog.askopenfilenames(filetypes=[("Excel files", "*.xlsx")])
+    return file
 
 # Selecionar arquivo Excel
-caminhos_arquivos = selecionar_arquivos()
+file = select_file()
 
 # Se nenhum arquivo for selecionado, encerra o programa
-if not caminhos_arquivos:
+if not file:
     print(red("Nenhum arquivo selecionado."))
     exit()
 
 # Usar apenas o primeiro arquivo selecionado
-excel_file = caminhos_arquivos[0]
+excel_file = file[0]
 
 # Lendo arquivo excel a partir da 8ª linha e ignorando as 2 últimas linhas
 try:

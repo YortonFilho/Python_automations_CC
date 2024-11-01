@@ -40,7 +40,7 @@ def data_colect():
             all_data.extend(data) 
             print(green(f"Dados extraídos da página {count} com sucesso!"))
 
-            count =+ 1
+            count += 1
             page_id = response.headers.get('x-cursor-nextpage')  # verifica o id da próxima página
             
             if not page_id:  # Se não houver mais páginas, sai do loop
@@ -83,7 +83,7 @@ def data_updating(final_df):
     try:
         with db_connection() as connection:
             with connection.cursor() as cursor:
-                table = 'DADOS_PAGARME_API_V1_LINKS'
+                table = 'DADOS_PAGARME_V1_LINKS'
 
                 insert_command = f"""
                     INSERT INTO {table} (

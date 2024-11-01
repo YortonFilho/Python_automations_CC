@@ -4,6 +4,7 @@ import base64
 import sys
 import pyodbc
 import os
+from unidecode import unidecode
 
 # Importando as funções globais para reaproveitamento de código
 sys.path.append("C:\\data-integration\\Automatizacao\\Python\\Yorton\\Python_automations_CC\\functions")
@@ -91,35 +92,26 @@ def data_colect():
 
     return df_filtered
 
-# Função para inserir dados no banco de dados
 def data_updating(final_df):
     try:
-        with db_connection() as connection:  # Conecta ao banco de dados
+        with db_connection() as connection:
             with connection.cursor() as cursor:
                 table = 'DADOS_PAGARME_V1_ORDERS' 
-
+                
                 insert_command = f"""
-                                    INSERT INTO {table} (
-                                        STATUS,
-                                        ID,
-                                        VALOR,
-                                        ID_LINK_PAGAMENTO,
-                                        DATA_CRIACAO,
-                                        ID_ITEM,
-                                        ITEM,
-                                        VALOR_UNITARIO_ITEM
-                                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                                """
+                    INSERT INTO {table} (
+                        STATUS,
+                        ID,
+                        VALOR,
+                        ID_LINK_PAGAMENTO,
+                        DATA_CRIACAO,
+                        ID_ITEM,
+                        ITEM,
+                        VALOR_UNITARIO_ITEM
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """
 
                 delete_command = f"DELETE FROM {table}"
-
-                # Listar colunas da tabela para depuração
-                # cursor.execute(f"SELECT COLUMN_NAME FROM ALL_TAB_COLUMNS WHERE TABLE_NAME = '{table}'")
-                # columns = [row[0] for row in cursor.fetchall()]  # Obtém os nomes das colunas
-                # print(green(f"Colunas na tabela {table}: {columns}"))
-
-                # Verifique os nomes das colunas no DataFrame
-                # print("Colunas no DataFrame:", final_df.columns.tolist())
 
                 try:
                     cursor.execute(delete_command)
@@ -129,22 +121,38 @@ def data_updating(final_df):
                     exit()
 
                 for index, row in final_df.iterrows():
+                    try:
+                        amount = float(row['VALOR'])
+                        unit_price = float(row['VALOR_UNITARIO_ITEM'])
+                    except ValueError:
+                        print(red(f"Valor inválido encontrado na linha {index}: {row}"))
+                        continue
+
+                    # Normaliza o nome do item
+                    item_normalized = unidecode(row['ITEM'])
+
                     values = row.loc[['STATUS', 'ID', 'VALOR', 'ID_LINK_PAGAMENTO',
-                                    'DATA_CRIACAO', 'ID_ITEM', 'ITEM',
-                                    'VALOR_UNITARIO_ITEM']].tolist()  # Extrai valores da linha
-                    
-                    # print("Valores a serem inseridos:", values)  # Exibe valores para depuração
+                                      'DATA_CRIACAO', 'ID_ITEM', 
+                                      'VALOR_UNITARIO_ITEM']].tolist()
+
+                    # Adiciona o ITEM normalizado à lista de valores
+                    values.insert(6, item_normalized)
 
                     try:
                         cursor.execute(insert_command, values)
                     except pyodbc.Error as e:
                         print(red(f"Erro ao inserir dados: {e} - Valores: {values}"))
+                    except UnicodeEncodeError:
+                        print(red(f"Erro de codificação ao inserir dados: {values}"))
+                    except Exception as e:
+                        print(red(f"Erro inesperado ao inserir dados: {e} - Valores: {values}"))
 
-                connection.commit()  # Salva as alterações no banco de dados
+                connection.commit()
                 print(green("Dados importados com sucesso!"))
 
     except pyodbc.Error as e:
         print(red(f"Erro ao conectar ou interagir com o banco de dados: {e}"))
+
 
 # Execução principal
 if __name__ == "__main__":

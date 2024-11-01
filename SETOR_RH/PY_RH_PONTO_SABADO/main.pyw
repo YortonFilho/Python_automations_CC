@@ -9,18 +9,18 @@ from openpyxl.styles import PatternFill, Font
 from time import sleep
 
 # função para exibir uma janela de erro
-def mostrar_erro(mensagem):
+def show_error(mensagem):
     root = tk.Tk()
     root.withdraw()
     messagebox.showerror("Erro", mensagem)
     root.destroy()
 
 # função para selecionar os arquivos a serem analisados
-def selecionar_arquivos():
+def select_files():
     root = tk.Tk()
     root.withdraw()
-    caminhos_arquivos = filedialog.askopenfilenames(filetypes=[("Excel files", "*.xlsx")])
-    return caminhos_arquivos
+    file = filedialog.askopenfilenames(filetypes=[("Excel files", "*.xlsx")])
+    return file
 
 # cria a janela principal
 root = tk.Tk()
@@ -28,47 +28,47 @@ root.withdraw()  # oculta a janela principal
 
 # variaveis da data
 date = datetime.now()
-mes = f'{date.month:02d}'
-dia = f'{date.day:02d}'
+month = f'{date.month:02d}'
+day = f'{date.day:02d}'
 
 # pede pro usuario selecionar as planilhas 
 messagebox.showinfo("Selecionar Arquivo", "Selecione a planilha base dos colaboradores!")
-base_colaboradores = selecionar_arquivos()
-if not base_colaboradores:
-    mostrar_erro(f"Nenhum arquivo selecionado. Encerrando programa!")
+collaborator_base = select_files()
+if not collaborator_base:
+    show_error(f"Nenhum arquivo selecionado. Encerrando programa!")
     exit()
 
 messagebox.showinfo("Selecionar Arquivo", "Selecione todas planilhas de ponto!")
-planilhas = selecionar_arquivos()
-if not planilhas:
-    mostrar_erro(f"Nenhum arquivo selecionado. Encerrando programa!")
+sheets = select_files()
+if not sheets:
+    show_error(f"Nenhum arquivo selecionado. Encerrando programa!")
     exit()
 
 # variavel para armazenar os pontos dos colaboradores
-presenca = {}
+presence = {}
 
 # analisa cada planilha de ponto
-for i, planilha in enumerate(planilhas):
+for i, sheet in enumerate(sheets):
     try:
         # ler a planilha
-        df = pd.read_excel(planilha)
+        df = pd.read_excel(sheet)
 
         # verificar se a primeira coluna (index 0) existe e tentar extrair a data
         if df.shape[1] > 0:
-            primeira_coluna = str(df.iloc[0, 0])
-            data_match = re.search(r'(\d{2}/\d{2}/\d{4})', primeira_coluna)
+            first_column = str(df.iloc[0, 0])
+            data_match = re.search(r'(\d{2}/\d{2}/\d{4})', first_column)
 
             if data_match:
                 data_str = data_match.group(1)
-                data_formatada = datetime.strptime(data_str, '%d/%m/%Y').strftime('%d-%m-%Y')
+                formatted_date = datetime.strptime(data_str, '%d/%m/%Y').strftime('%d-%m-%Y')
             else:
-                data_formatada = 'data_nao_encontrada'
+                formatted_date = 'data_nao_encontrada'
 
             # verificar se a segunda coluna (index 1) existe
             if df.shape[1] > 1:
-                for index, valor in enumerate(df.iloc[:, 1]):  # acessa a segunda coluna
-                    if isinstance(valor, str) and not any(char.isdigit() for char in valor):
-                        nome = valor.strip()
+                for index, value in enumerate(df.iloc[:, 1]):  # acessa a segunda coluna
+                    if isinstance(value, str) and not any(char.isdigit() for char in value):
+                        name = value.strip()
 
                         # verifica as linhas abaixo do nome do colaborador
                         if index + 2 < len(df):
@@ -77,73 +77,73 @@ for i, planilha in enumerate(planilhas):
 
                             if (pd.notna(linha_baixo_1) and linha_baixo_1 != '') and \
                                (pd.notna(linha_baixo_2) and linha_baixo_2 != ''):
-                                if nome not in presenca:
-                                    presenca[nome] = [0] * len(planilhas)
+                                if name not in presence:
+                                    presence[name] = [0] * len(sheets)
 
-                                presenca[nome][i] = 1
+                                presence[name][i] = 1
                             else:
                                 continue
             else:
-                mostrar_erro(f"A planilha {planilha} não contém a coluna esperada.")
+                show_error(f"A planilha {sheet} não contém a coluna esperada.")
                 exit()
     except Exception as e:
-        mostrar_erro(f"erro ao processar {planilha}: {e}")
+        show_error(f"erro ao processar {sheet}: {e}")
         exit()
 
 # filtrar apenas colaboradores que tem pelo menos uma presença
-presenca_filtrada = {k: v for k, v in presenca.items() if any(presenca[k])}
+filtered_presence = {k: v for k, v in presence.items() if any(presence[k])}
 
 # criar um DataFrame a partir do dicionario filtrado
-df_nomes = pd.DataFrame.from_dict(presenca_filtrada, orient='index', columns=[f'planilha_{i + 1}' for i in range(len(planilhas))]).reset_index()
-df_nomes.columns = ['colaborador'] + [datetime.strptime(re.search(r"(\d{2}/\d{2}/\d{4})", str(pd.read_excel(planilhas[j]).iloc[0, 0])).group(1), "%d/%m/%Y").strftime("%d-%m-%Y") for j in range(len(planilhas))]
+df_names = pd.DataFrame.from_dict(filtered_presence, orient='index', columns=[f'planilha_{i + 1}' for i in range(len(sheet))]).reset_index()
+df_names.columns = ['colaborador'] + [datetime.strptime(re.search(r"(\d{2}/\d{2}/\d{4})", str(pd.read_excel(sheet[j]).iloc[0, 0])).group(1), "%d/%m/%Y").strftime("%d-%m-%Y") for j in range(len(sheet))]
 
 # adicionar a coluna total
-df_nomes['total'] = df_nomes.iloc[:, 1:].sum(axis=1)
+df_names['total'] = df_names.iloc[:, 1:].sum(axis=1)
 
 # ordenar o DataFrame pelo nome do colaborador
-df_nomes.sort_values(by='colaborador', inplace=True)
+df_names.sort_values(by='colaborador', inplace=True)
 
 # processar a planilha base para obter os cargos
 try:
     # ler a planilha base com o cabeçalho na quarta linha
-    base_df = pd.read_excel(base_colaboradores[0], header=3)
+    base_df = pd.read_excel(collaborator_base[0], header=3)
     
     # selecionar as colunas 'I' e 'J'
     col_colaborador = base_df.columns[8]
     col_cargo = base_df.columns[9]  
 
     # adicionar uma nova coluna para cargos
-    cargo_dict = dict(zip(base_df[col_colaborador], base_df[col_cargo]))
+    list_of_positions = dict(zip(base_df[col_colaborador], base_df[col_cargo]))
 
     # verificando se todos os colaboradores encontrados têm um cargo
-    df_nomes['cargo'] = df_nomes['colaborador'].map(cargo_dict).fillna('cargo_nao_encontrado')
+    df_names['cargo'] = df_names['colaborador'].map(list_of_positions).fillna('cargo_nao_encontrado')
 
     # reordenar as colunas para que 'cargo' fique ao lado de 'colaborador'
-    df_nomes = df_nomes[['colaborador', 'cargo'] + [col for col in df_nomes.columns if col not in ['colaborador', 'cargo']]]
+    df_names = df_names[['colaborador', 'cargo'] + [col for col in df_names.columns if col not in ['colaborador', 'cargo']]]
     
 except Exception as e:
-    mostrar_erro(f"erro ao processar a planilha base de colaboradores: {e}")
+    show_error(f"erro ao processar a planilha base de colaboradores: {e}")
     
 
 # salvar o DataFrame em uma nova planilha na pasta de downloads do usuario
-usuario = os.getlogin()
-pasta = f'C:/Users/{usuario}/Downloads/Colaboradores_Ponto_Sábados_{dia}_{mes}.xlsx'
+user = os.getlogin()
+folder = f'C:/Users/{user}/Downloads/Colaboradores_Ponto_Sábados_{day}_{month}.xlsx'
 
 # formatando a tabela para melhor visualização
-with pd.ExcelWriter(pasta, engine='openpyxl') as writer:
-    df_nomes.to_excel(writer, index=False, sheet_name='Colaboradores')
+with pd.ExcelWriter(folder, engine='openpyxl') as writer:
+    df_names.to_excel(writer, index=False, sheet_name='Colaboradores')
     workbook = writer.book
     worksheet = writer.sheets['Colaboradores']
 
     # aplicar formatação em listras
-    for row in range(2, len(df_nomes) + 2):  # começar da linha 2, pois a linha 1 é o cabeçalho
+    for row in range(2, len(df_names) + 2):  # começar da linha 2, pois a linha 1 é o cabeçalho
         if row % 2 == 0:
-            for col in range(1, len(df_nomes.columns) + 1):
+            for col in range(1, len(df_names.columns) + 1):
                 cell = worksheet.cell(row=row, column=col)
                 cell.fill = PatternFill(start_color="E0E0E0", end_color="E0E0E0", fill_type="solid")
 
     # formatar cabeçalho
-    for col in range(1, len(df_nomes.columns) + 1):
+    for col in range(1, len(df_names.columns) + 1):
         header_cell = worksheet.cell(row=1, column=col)
         header_cell.fill = PatternFill(start_color="000000", end_color="000000", fill_type="solid")  # cor de fundo preta
         header_cell.font = Font(color="FFFFFF", bold=True)  # cor do texto branca e em negrito

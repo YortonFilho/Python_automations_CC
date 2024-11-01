@@ -43,6 +43,8 @@ def data_colect():
                 count += 1
                 page_id = response.headers.get('x-cursor-nextpage')  # Obtém o ID da próxima página
 
+                # if count > 200:
+                #     break
                 if not page_id:  # Se não houver mais páginas, sai do loop
                     print(green("Dados coletados com sucesso!"))
                     break

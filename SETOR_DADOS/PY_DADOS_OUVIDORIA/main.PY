@@ -6,6 +6,7 @@ import holidays
 import os
 import sys
 import pyodbc
+import numpy as np
 
 sys.path.append("C:\\data-integration\\Automatizacao\\Python\\Yorton\\Python_automations_CC\\functions")
 from data_base import db_connection  # função para conectar com banco de dados
@@ -72,25 +73,25 @@ def adjust_sla_column(df):
 
 # Função para adicionar a coluna FILTRO com base na coluna SLA_AJUSTADO
 def add_filtro_column(df):
-    df['DIA_UTEIS'] = df.apply(lambda row: contar_dias_uteis(row['DATA_CRIACAO'], row['DATA_FECHAMENTO']), axis=1)
+    df['DIA_UTEIS'] = df.apply(lambda row: count_business_days(row['DATA_CRIACAO'], row['DATA_FECHAMENTO']), axis=1)
     df['FILTRO'] = df['DIA_UTEIS'].apply(lambda x: 'OK' if x <= 2 else 'FORA')
     return df
 
 # Função para contar dias úteis
-def contar_dias_uteis(data_criacao, data_fechamento):
-    brasil = holidays.Brazil()  # Feriados nacionais
-    data_criacao = pd.to_datetime(data_criacao, format='%d/%m/%Y')
-    data_fechamento = pd.to_datetime(data_fechamento, format='%d/%m/%Y')
+def count_business_days(creation_date, closing_date):
+    brazil = holidays.Brazil()  # Feriados nacionais
+    creation_date = pd.to_datetime(creation_date, format='%d/%m/%Y')
+    closing_date = pd.to_datetime(closing_date, format='%d/%m/%Y')
     
-    dias_uteis = 0
-    data_atual = data_criacao
+    business_days = 0
+    current_date = creation_date
 
-    while data_atual <= data_fechamento:
-        if data_atual.weekday() < 6 and data_atual not in brasil:  # Verifica se não é domingo(6) e não é feriado
-            dias_uteis += 1
-        data_atual += timedelta(days=1)
+    while current_date <= closing_date:
+        if current_date.weekday() < 6 and current_date not in brazil:  # Verifica se não é domingo(6) e não é feriado
+            business_days += 1
+        current_date += timedelta(days=1)
 
-    return dias_uteis
+    return business_days
 
 # Variáveis da API
 token = os.getenv('CHAVE_API_CLICKUP')
@@ -130,7 +131,7 @@ df = pd.DataFrame(tasks)
 # Normalizando as colunas com JSONs ou arrays
 df = normalize_columns(df)
 
-# Selecionando apenas as colunas desejadas
+# Selecionando apenas as colunas desejadas se existirem
 desired_columns = [
     'name', 
     'assignees_0_username', 
@@ -140,9 +141,20 @@ desired_columns = [
     'custom_fields_3_value'
 ]
 
+# Verifica quais colunas desejadas estão disponíveis
 available_columns = [col for col in desired_columns if col in df.columns]
+
+# Se 'assignees_0_username' não estiver disponível, adicione a coluna com valores nulos
+if 'assignees_0_username' not in available_columns:
+    print("Coluna 'assignees_0_username' não encontrada. Será adicionada com valores nulos.")
+    df['assignees_0_username'] = np.nan  # Adiciona a coluna com valores nulos
+
+# Filtra o DataFrame usando as colunas disponíveis
 df_filtered = df[available_columns]
-df_filtered = df_filtered[desired_columns]
+
+# Assegura que df_filtered mantém a ordem desejada das colunas
+df_filtered = df_filtered.reindex(columns=desired_columns)
+
 
 # Converte os timestamps para datas e formata como DD/MM/AAAA
 df_filtered = convert_and_format_dates(df_filtered, ['date_created', 'date_closed'])
